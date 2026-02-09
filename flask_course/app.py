@@ -42,6 +42,16 @@ def contact():
 
         return f"Saved! Hello {name}, your email is {email}"
     return render_template('contact.html')
+@app.route('/users')
+def users():
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM contacts")
+    data = cur.fetchall()
+    conn.close()
+
+    return render_template('users.html', users=data)
 
 if __name__ == "__main__":
+    # app.run(debug=True, port=8000)
     app.run(debug=True)
