@@ -1,6 +1,22 @@
 from flask import Flask, render_template, request
+import sqlite3
 
 app = Flask(__name__)
+
+def init_db():
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS contacts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            email TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+init_db()
 
 @app.route('/')
 def home():
@@ -13,10 +29,18 @@ def about():
 @app.route('/contact',methods=['GET','POST'])
 def contact():
     if request.method == 'POST':
-        username = request.form['username']
+        name = request.form['username']
         email = request.form['email']
+
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        cur.execute("INSERT INTO contacts (name, email) VALUES (?, ?)", (name, email))
+        conn.commit()
+        conn.close()
+
         # return f"Hello {username}, we received your message!"
-        return f"Hello {username}, your email is {email}"
+
+        return f"Saved! Hello {name}, your email is {email}"
     return render_template('contact.html')
 
 if __name__ == "__main__":
