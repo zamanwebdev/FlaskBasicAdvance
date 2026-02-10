@@ -52,6 +52,35 @@ def users():
 
     return render_template('users.html', users=data)
 
+@app.route('/delete/<int:id>')
+def delete(id):
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    cur.execute("DELETE FROM contacts WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+    return "User Deleted! <br><a href='/users'>Back</a>"
+
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
+def update(id):
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+
+    if request.method == 'POST':
+        name = request.form['username']
+        email = request.form['email']
+        cur.execute("UPDATE contacts SET name=?, email=? WHERE id=?", (name, email, id))
+        conn.commit()
+        conn.close()
+        return "Updated Successfully! <br><a href='/users'>Back</a>"
+
+    cur.execute("SELECT * FROM contacts WHERE id=?", (id,))
+    user = cur.fetchone()
+    conn.close()
+
+    return render_template('update.html', user=user)
+
+
 if __name__ == "__main__":
     # app.run(debug=True, port=8000)
     app.run(debug=True)

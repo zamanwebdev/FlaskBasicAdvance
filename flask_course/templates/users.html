@@ -13,6 +13,8 @@
             <th>ID</th>
             <th>Name</th>
             <th>Email</th>
+            <th>Delete</th>
+            <th>Update</th>
         </tr>
 
         {% for user in users %}
@@ -20,6 +22,15 @@
             <td>{{ user[0] }}</td>
             <td>{{ user[1] }}</td>
             <td>{{ user[2] }}</td>
+            <td>
+                <a href="/delete/{{ user[0] }}" onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+            <td>
+                <a href="/update/{{ user[0]}}">Edit</a>
+            </td>
+
+
+
         </tr>
         {% endfor %}
 
@@ -27,6 +38,7 @@
 
     <br>
     <a href="/">Back to Home</a>
+    <a href="/contact">Add New Contact</a>
 
 </body>
 </html>
