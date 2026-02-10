@@ -14,8 +14,17 @@ def init_db():
             email TEXT
         )
     ''')
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            password TEXT
+        )
+        ''')
     conn.commit()
     conn.close()
+
+
 
 init_db()
 
@@ -84,6 +93,45 @@ def update(id):
     conn.close()
 
     return render_template('update.html', user=user)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        cur.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        conn.commit()
+        conn.close()
+
+        flash("Registration Successful! Please login.", "success")
+        return redirect(url_for('login'))
+
+    return render_template('register.html')
+# Login Route
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
+        user = cur.fetchone()
+        conn.close()
+
+        if user:
+            flash("Login Successful!", "success")
+            return redirect(url_for('users'))
+        else:
+            flash("Invalid Credentials", "danger")
+
+    return render_template('login.html')
+
+
 
 
 if __name__ == "__main__":
