@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, flash, redirect, url_for
 import sqlite3
 
 app = Flask(__name__)
+app.secret_key = "mysecretkey"
 
 def init_db():
     conn = sqlite3.connect('database.db')
@@ -26,7 +27,7 @@ def home():
 def about():
     return render_template('about.html')
 
-@app.route('/contact',methods=['GET','POST'])
+@app.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
         name = request.form['username']
@@ -38,10 +39,11 @@ def contact():
         conn.commit()
         conn.close()
 
-        # return f"Hello {username}, we received your message!"
+        flash("User Added Successfully!", "success")
+        return redirect(url_for('users'))
 
-        return f"Saved! Hello {name}, your email is {email}"
     return render_template('contact.html')
+
 @app.route('/users')
 def users():
     conn = sqlite3.connect('database.db')
@@ -59,8 +61,10 @@ def delete(id):
     cur.execute("DELETE FROM contacts WHERE id=?", (id,))
     conn.commit()
     conn.close()
-    return "User Deleted! <br><a href='/users'>Back</a>"
-
+    flash("User Deleted!", "danger")
+    return redirect(url_for('users'))
+    # return "User Deleted! <br><a href='/users'>Back</a>"
+    # return render_template('users.html')
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
 def update(id):
     conn = sqlite3.connect('database.db')
@@ -72,7 +76,8 @@ def update(id):
         cur.execute("UPDATE contacts SET name=?, email=? WHERE id=?", (name, email, id))
         conn.commit()
         conn.close()
-        return "Updated Successfully! <br><a href='/users'>Back</a>"
+        flash("User Updated!", "warning")
+        return redirect(url_for('users'))
 
     cur.execute("SELECT * FROM contacts WHERE id=?", (id,))
     user = cur.fetchone()
